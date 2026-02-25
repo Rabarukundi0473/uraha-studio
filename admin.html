@@ -3,248 +3,327 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uraha | Back Office</title>
+    <title>Uraha Art Shop | Curated Collection</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
     <style>
-        :root { 
-            --bg: #f8f8f8; --card: #ffffff; --text: #1a1a1a; 
-            --accent: #7a7a7a; --border: #eeeeee; 
-            --warn: #fff9e6; --crit: #ffe6e6;
+        :root {
+            --bg: #ffffff; --text: #1a1a1a; --accent: #7a7a7a;
+            --light-grey: #f4f4f4; --border: #eeeeee;
+            --transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); padding: 2rem; display: none; }
-        .admin-container { max-width: 1200px; margin: 0 auto; }
-        
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
-        
-        h2 { font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin: 0; }
-        h3 { font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-        
-        .btn { padding: 0.6rem 1.2rem; cursor: pointer; border: 1px solid var(--text); background: var(--text); color: white; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; font-family: inherit; border-radius: 2px; transition: 0.3s; text-decoration: none; }
-        .btn-outline { background: transparent; color: var(--text); text-decoration: none !important; }
-        .btn-save { background: #1a1a1a; color: #fff; width: 100%; margin-top: 10px; }
-        .btn-cancel { background: #eee; color: #333; border: none; width: 100%; margin-top: 5px; }
-        .btn-reset { background: transparent; border: 1px solid #e74c3c; color: #e74c3c; font-size: 0.6rem; padding: 4px 8px; cursor: pointer; border-radius: 2px; }
-        .btn-export { background: transparent; border: 1px solid var(--text); color: var(--text); font-size: 0.6rem; padding: 4px 8px; cursor: pointer; border-radius: 2px; text-transform: uppercase; }
+        [data-theme="dark"] {
+            --bg: #0b0b0b; --text: #ffffff; --accent: #999999;
+            --light-grey: #1a1a1a; --border: #222222;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); transition: background var(--transition); overflow-x: hidden; }
 
-        .editor-grid { display: grid; grid-template-columns: 300px 1fr 350px; gap: 1.5rem; }
-        .card { background: var(--card); padding: 1.5rem; border: 1px solid var(--border); margin-bottom: 1.5rem; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 5%; position: sticky; top: 0; background: var(--bg); border-bottom: 1px solid var(--border); z-index: 100; }
+        .brand-logo { display: flex; align-items: center; gap: 8px; cursor: pointer; text-decoration: none; color: inherit; }
+        .brand-logo img { height: 25px; width: auto; } 
+        .brand-name { font-weight: 600; letter-spacing: 2px; text-transform: uppercase; font-size: 0.9rem; }
         
-        label { display: block; font-size: 0.6rem; text-transform: uppercase; margin-bottom: 0.4rem; color: var(--accent); font-weight: 600; letter-spacing: 0.5px; }
-        input, select, textarea { 
-            width: 100%; 
-            padding: 0.8rem 1rem; 
-            border: 1px solid var(--border); 
-            font-family: inherit; 
-            border-radius: 2px; 
-            margin-bottom: 1rem; 
-            font-size: 0.8rem; 
-            outline: none; 
-            background: #fafafa; 
-            box-sizing: border-box; 
+        .search-container { flex-grow: 1; max-width: 300px; margin: 0 2rem; }
+        .search-input { width: 100%; padding: 0.6rem 1rem; border: 1px solid var(--border); background: var(--light-grey); color: var(--text); border-radius: 4px; outline: none; font-size: 0.8rem; margin-bottom: 10px; }
+
+        .nav-controls { display: flex; gap: 1.2rem; align-items: center; }
+        .btn-icon { background: none; border: none; color: var(--text); cursor: pointer; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; font-family: inherit; }
+
+        .categories { display: flex; justify-content: center; gap: 2rem; padding: 1.2rem 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+        .cat-btn { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s; padding-bottom: 4px; border-bottom: 2px solid transparent; font-family: inherit; }
+        .cat-btn.active { color: var(--text); border-bottom: 2px solid var(--text); }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 5%; }
+        .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2.5rem; margin-bottom: 5rem; }
+        
+        .product-card { position: relative; }
+        .sold-out-tag { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 4px 10px; font-size: 0.6rem; z-index: 10; }
+        .low-stock-tag { position: absolute; top: 10px; left: 10px; background: #f1c40f; color: #000; padding: 4px 10px; font-size: 0.6rem; z-index: 10; font-weight: 600; }
+        
+        .product-img-wrapper { width: 100%; aspect-ratio: 1/1; background: var(--light-grey); margin-bottom: 1rem; overflow: hidden; cursor: pointer; }
+        .product-card img { width: 100%; height: 100%; object-fit: cover; transition: 0.6s ease; }
+        .product-card.out-of-stock img { opacity: 0.4; filter: grayscale(1); }
+        .product-card:hover img { transform: scale(1.05); }
+        .product-info { display: flex; justify-content: space-between; align-items: center; }
+        .price { color: var(--accent); font-weight: 300; font-size: 0.85rem; }
+
+        .panel { position: fixed; top: 0; width: 100%; max-width: 400px; height: 100%; background: var(--bg); z-index: 1000; padding: 3rem 2rem; display: flex; flex-direction: column; transition: var(--transition); box-shadow: 0 0 50px rgba(0,0,0,0.1); visibility: hidden; }
+        #cart-panel { right: -100%; border-left: 1px solid var(--border); }
+        #detail-panel { left: -100%; border-right: 1px solid var(--border); }
+        .panel.active { right: 0 !important; left: 0 !important; visibility: visible; }
+        .panel-close { position: absolute; top: 1.5rem; right: 2rem; cursor: pointer; font-size: 0.65rem; }
+
+        label { display: block; font-size: 0.6rem; text-transform: uppercase; margin-bottom: 5px; color: var(--accent); font-weight: 600; margin-top: 10px; }
+        .btn-main { background: var(--text); color: var(--bg); border: 1px solid var(--text); padding: 1rem; width: 100%; cursor: pointer; font-family: inherit; text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem; margin-top: 10px; }
+        .btn-main:disabled { background: var(--border); color: var(--accent); border-color: var(--border); cursor: not-allowed; }
+        
+        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 0.8rem 1.5rem; border-radius: 50px; font-size: 0.75rem; opacity: 0; visibility: hidden; transition: 0.3s; z-index: 3000; }
+        #toast.show { opacity: 1; visibility: visible; bottom: 50px; }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            nav { padding: 0.8rem 1rem; }
+            .search-container { display: none; } /* Hide search on mobile nav to save space */
+            .products { grid-template-columns: 1fr 1fr; gap: 1rem; }
+            .panel { max-width: 100%; }
+            .brand-name { font-size: 0.7rem; }
+            .categories { gap: 1rem; overflow-x: auto; justify-content: flex-start; padding: 1rem 5%; white-space: nowrap; }
         }
-        input:focus, textarea:focus { background: white; border-color: #aaa; }
-        
-        .list-item { display: flex; align-items: center; justify-content: space-between; padding: 0.8rem; border-bottom: 1px solid var(--border); font-size: 0.8rem; }
-        .low-stock { background-color: var(--warn); }
-        .out-stock { background-color: var(--crit); }
-        .btn-edit-action { color: var(--text); border: none; background: none; cursor: pointer; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; opacity: 0.6; transition: 0.2s; }
-        .btn-edit-action:hover { opacity: 1; }
-        
-        #code-output { width: 100%; height: 160px; font-family: monospace; font-size: 0.65rem; background: #1a1a1a; color: #a6e22e; padding: 1rem; overflow-y: auto; white-space: pre; border-radius: 4px; }
-        
-        .revenue-display { display: flex; flex-direction: column; align-items: flex-end; }
-        .rev-label { font-size: 0.6rem; text-transform: uppercase; color: var(--accent); letter-spacing: 1px; }
-        .rev-value { font-size: 1.8rem; font-weight: 300; color: var(--text); }
-        .sale-row { display: grid; grid-template-columns: 150px 1fr 120px; padding: 1rem 0; border-bottom: 1px solid var(--border); font-size: 0.75rem; align-items: center; }
     </style>
 </head>
 <body>
 
-<div class="admin-container">
-    <header>
-        <div>
-            <h2>URAHA ADMIN</h2>
-            <p style="font-size: 0.75rem; color: var(--accent); letter-spacing: 1px;">Studio Management System</p>
-        </div>
-        <a href="index.html" class="btn btn-outline">Exit to Shop</a>
-    </header>
+<nav>
+    <a href="#" class="brand-logo" onclick="location.reload()">
+        <img src="home-page/logo.png" alt="Logo" onerror="this.style.display='none'">
+        <span class="brand-name">Uraha</span>
+    </a>
+    <div class="search-container">
+        <input type="text" class="search-input" id="search" placeholder="Search..." onkeyup="filterProducts()">
+    </div>
+    <div class="nav-controls">
+        <button class="btn-icon" id="curr-btn" onclick="toggleCurrency()">USD</button>
+        <button class="btn-icon" onclick="toggleTheme()">Dark</button>
+        <button class="btn-icon" onclick="togglePanel('cart-panel', true)">Bag (<span id="cart-count">0</span>)</button>
+    </div>
+</nav>
 
-    <div class="editor-grid">
-        <div class="card">
-            <h3>Categories</h3>
-            <div id="category-list" style="margin-bottom:1.5rem; max-height: 250px; overflow-y: auto;"></div>
-            <label>New Category</label>
-            <input type="text" id="new-cat-name" placeholder="...">
-            <button class="btn btn-save" onclick="addCategory()">Add</button>
-        </div>
+<div class="categories" id="cat-bar"></div>
 
-        <div>
-            <div class="card" id="form-card">
-                <h3 id="form-title">Product Details</h3>
-                <input type="hidden" id="p-id">
-                <label>Item Name</label><input type="text" id="p-name">
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-                    <div><label>Price (USD)</label><input type="number" id="p-price"></div>
-                    <div><label>Stock Qty</label><input type="number" id="p-stock"></div>
-                </div>
-                <label>Category</label><select id="p-cat"></select>
-                <label>Image Path</label><input type="text" id="p-img" placeholder="home-page/1.jpg">
-                <label>Description</label><textarea id="p-desc" rows="3"></textarea>
-                
-                <button class="btn btn-save" id="main-btn" onclick="handleSave()">Update Studio Inventory</button>
-                <button class="btn btn-cancel" id="cancel-btn" style="display:none;" onclick="resetForm()">Cancel Edit</button>
-            </div>
+<main class="container">
+    <div class="products" id="product-grid" style="margin-top: 3rem;"></div>
+</main>
 
-            <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <h3 style="margin-bottom:0; border:none;">Data Sync</h3>
-                    <div>
-                        <button class="btn-export" style="font-size:0.5rem;" onclick="downloadBackup()">Backup JSON</button>
-                        <button class="btn-export" style="font-size:0.5rem;" onclick="document.getElementById('importFile').click()">Restore</button>
-                        <input type="file" id="importFile" style="display:none" onchange="importBackup(event)">
-                    </div>
-                </div>
-                <div id="code-output"></div>
-                <button class="btn btn-outline" style="margin-top:1rem; width:100%" onclick="copyCode()">Copy Sync Code</button>
-            </div>
-        </div>
+<div class="panel" id="cart-panel">
+    <span class="panel-close" onclick="togglePanel('cart-panel', false)">CLOSE</span>
+    <h3 style="text-transform:uppercase; letter-spacing:2px; font-weight:400; margin-bottom: 2rem;">Selection</h3>
+    
+    <div id="cart-items" style="flex-grow:1; overflow-y:auto; margin-bottom: 1rem;"></div>
 
-        <div class="card">
-            <h3>Inventory Status</h3>
-            <div id="inventory-list" style="max-height: 750px; overflow-y: auto;"></div>
+    <div id="checkout-form" style="display:none; border-top: 1px solid var(--border); padding-top: 1rem;">
+        <label>Full Name</label>
+        <input type="text" id="cust-name" class="search-input" placeholder="Your Name">
+        <label>Delivery Address</label>
+        <textarea id="cust-address" class="search-input" style="height:60px; padding:10px;" placeholder="House / Apartment / Road"></textarea>
+        
+        <label>Payment Method</label>
+        <select id="pay-method" class="search-input" onchange="toggleSlipUpload()">
+            <option value="Card">Credit/Debit Card</option>
+            <option value="Bank Transfer">Bank Transfer (BML)</option>
+        </select>
+
+        <div id="slip-upload-area" style="display:none;">
+            <label>Upload Payment Slip</label>
+            <input type="file" id="pay-slip" accept="image/*" style="font-size:0.7rem; margin-top:5px;">
         </div>
     </div>
 
-    <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items: flex-start; margin-bottom: 2rem;">
-            <div>
-                <h3>Sales Performance</h3>
-                <button class="btn-export" onclick="exportToCSV()">Export CSV</button>
-                <button class="btn-reset" onclick="clearSales()">Clear Log</button>
-            </div>
-            <div class="revenue-display">
-                <span class="rev-label">Total Revenue</span>
-                <span id="total-rev" class="rev-value">$0.00</span>
-                <span id="mvr-rev" style="font-size: 0.7rem; color: var(--accent);">MVR 0.00</span>
-            </div>
+    <div style="border-top:1px solid var(--border); padding-top:1.5rem;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:1.5rem; font-weight:600">
+            <span>Subtotal</span><span id="subtotal">$0.00</span>
         </div>
-        <div id="sales-list"></div>
+        <button class="btn-main" id="checkout-btn" onclick="showCheckoutFields()">Proceed to Checkout</button>
+        <button class="btn-main" id="confirm-order-btn" style="display:none;" onclick="processOrder()">Place Order</button>
     </div>
 </div>
 
+<div class="panel" id="detail-panel">
+    <span class="panel-close" onclick="togglePanel('detail-panel', false)">CLOSE</span>
+    <div id="detail-content" style="margin-top:2rem;"></div>
+</div>
+
+<div id="toast">Added</div>
+
 <script>
-    const PASS = "uraha2026";
-    if (prompt("Secure Access Required:") !== PASS) { window.location.href = "index.html"; } 
-    else { document.body.style.display = "block"; }
+    const savedInv = localStorage.getItem('uraha_inventory');
+    const savedCats = localStorage.getItem('uraha_categories');
+    
+    const products = savedInv ? JSON.parse(savedInv) : [];
+    const categories = savedCats ? JSON.parse(savedCats) : ["Pendants", "Bracelets", "Art Works"];
 
-    let inventory = JSON.parse(localStorage.getItem('uraha_inventory')) || [];
-    let categories = JSON.parse(localStorage.getItem('uraha_categories')) || ["Pendants", "Bracelets", "Art Works"];
-    let sales = JSON.parse(localStorage.getItem('uraha_sales')) || [];
-    let editIndex = -1;
-    const MVR_RATE = 15.42;
+    let cart = [];
+    let currentCategory = 'All';
+    let isMVR = false;
+    const rate = 15.42;
 
-    function render() {
-        document.getElementById('category-list').innerHTML = categories.map((cat, i) => `
-            <div class="list-item"><span>${cat}</span><button onclick="removeCategory(${i})" style="color:red; border:none; background:none; cursor:pointer;">&times;</button></div>`).join('');
-        document.getElementById('p-cat').innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
-        document.getElementById('inventory-list').innerHTML = inventory.map((item, i) => {
-            let statusClass = item.stock === 0 ? "out-stock" : (item.stock <= 3 ? "low-stock" : "");
-            return `<div class="list-item ${statusClass}"><div><span style="font-weight:600;">${item.name}</span><br><small style="color:var(--accent);">${item.stock} left | $${item.price}</small></div><button onclick="startEdit(${i})" class="btn-edit-action">Edit</button></div>`;
+    function formatPrice(usd) {
+        if(isMVR) return `MVR ${(usd * rate).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+        return `$${usd.toFixed(2)}`;
+    }
+
+    function toggleCurrency() {
+        isMVR = !isMVR;
+        document.getElementById('curr-btn').innerText = isMVR ? 'MVR' : 'USD';
+        filterProducts();
+        updateCart();
+    }
+
+    function toggleTheme() { document.body.toggleAttribute('data-theme'); }
+
+    function togglePanel(id, state) {
+        const p = document.getElementById(id);
+        state ? p.classList.add('active') : p.classList.remove('active');
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg; t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    function renderCategories() {
+        const bar = document.getElementById('cat-bar');
+        let html = `<button class="cat-btn ${currentCategory === 'All' ? 'active' : ''}" onclick="filterCategory('All', this)">All</button>`;
+        categories.forEach(cat => {
+            html += `<button class="cat-btn ${currentCategory === cat ? 'active' : ''}" onclick="filterCategory('${cat}', this)">${cat}</button>`;
+        });
+        bar.innerHTML = html;
+    }
+
+    function renderProducts(items) {
+        const grid = document.getElementById('product-grid');
+        grid.innerHTML = items.map(p => {
+            const isOut = p.stock <= 0;
+            const isLow = !isOut && p.stock <= 3;
+            return `
+            <div class="product-card ${isOut ? 'out-of-stock' : ''}">
+                ${isOut ? '<div class="sold-out-tag">SOLD OUT</div>' : ''}
+                ${isLow ? '<div class="low-stock-tag">LIMITED STOCK</div>' : ''}
+                <div class="product-img-wrapper" onclick="showDetail(${p.id})">
+                    <img src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/400?text=Uraha'">
+                </div>
+                <div class="product-info">
+                    <div onclick="showDetail(${p.id})">
+                        <h4 style="font-size:0.8rem; font-weight:400;">${p.name}</h4>
+                        <span class="price">${formatPrice(p.price)}</span>
+                    </div>
+                    <button class="btn-icon" style="border:1px solid var(--border); padding: 4px 8px;" onclick="addToCart(${p.id})" ${isOut ? 'disabled' : ''}>${isOut ? '---' : '+ ADD'}</button>
+                </div>
+            </div>`;
         }).join('');
-        document.getElementById('sales-list').innerHTML = sales.length > 0 ? sales.map(s => `
-            <div class="sale-row"><div style="color:var(--accent); font-size:0.7rem;">${s.date}</div><div>${s.items}</div><div style="text-align: right; font-weight: 600;">$${s.total.toFixed(2)}</div></div>`).join('') : '<p style="text-align:center; color:var(--accent); padding: 2rem; font-size:0.8rem;">No transactions recorded.</p>';
+    }
 
-        const totalUSD = sales.reduce((sum, s) => sum + s.total, 0);
-        document.getElementById('total-rev').innerText = `$${totalUSD.toFixed(2)}`;
-        document.getElementById('mvr-rev').innerText = `MVR ${(totalUSD * MVR_RATE).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+    function filterProducts() {
+        const query = document.getElementById('search').value.toLowerCase();
+        const filtered = products.filter(p => (currentCategory === 'All' || p.category === currentCategory) && p.name.toLowerCase().includes(query));
+        renderProducts(filtered);
+    }
 
-        document.getElementById('code-output').textContent = `const products = ${JSON.stringify(inventory, null, 4)};\nconst categories = ${JSON.stringify(categories, null, 4)};`;
-        localStorage.setItem('uraha_inventory', JSON.stringify(inventory));
-        localStorage.setItem('uraha_categories', JSON.stringify(categories));
+    function filterCategory(cat, btn) {
+        currentCategory = cat;
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filterProducts();
+    }
+
+    function showDetail(id) {
+        const p = products.find(prod => prod.id === id);
+        const isOut = p.stock <= 0;
+        document.getElementById('detail-content').innerHTML = `
+            <img src="${p.image}" style="width:100%; aspect-ratio:1/1; object-fit:cover; margin-bottom:2rem; ${isOut ? 'grayscale(1)' : ''}">
+            <h2 style="font-weight:400; font-size: 1.2rem;">${p.name}</h2>
+            <p style="color:var(--accent); font-size:0.75rem; margin: 0.8rem 0;">${p.category} | ${formatPrice(p.price)}</p>
+            <p style="font-size: 0.8rem; line-height: 1.8; color: var(--accent);">${p.desc}</p>
+            <button class="btn-main" style="margin-top:2rem;" onclick="addToCart(${p.id})" ${isOut ? 'disabled' : ''}>${isOut ? 'Sold Out' : 'Add to Bag'}</button>`;
+        togglePanel('detail-panel', true);
+    }
+
+    function addToCart(id) {
+        const p = products.find(prod => prod.id === id);
+        cart.push({ ...p, cartId: Date.now() });
+        updateCart();
+        showToast(`Added to bag`);
+    }
+
+    function updateCart() {
+        document.getElementById('cart-count').innerText = cart.length;
+        const total = cart.reduce((sum, i) => sum + i.price, 0);
+        document.getElementById('subtotal').innerText = formatPrice(total);
+        document.getElementById('cart-items').innerHTML = cart.map((item, idx) => `
+            <div style="padding:1rem 0; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <span style="font-size:0.75rem;">${item.name}</span><br>
+                    <span style="font-size:0.65rem; color:var(--accent)">${formatPrice(item.price)}</span>
+                </div>
+                <button onclick="removeFromCart(${idx})" style="border:none; background:none; color:red; cursor:pointer; font-size:0.8rem;">&times;</button>
+            </div>`).join('');
+    }
+
+    function removeFromCart(index) {
+        cart.splice(index, 1);
+        updateCart();
+    }
+
+    function showCheckoutFields() {
+        if (cart.length === 0) return alert("Your bag is empty.");
+        document.getElementById('cart-items').style.display = 'none';
+        document.getElementById('checkout-form').style.display = 'block';
+        document.getElementById('checkout-btn').style.display = 'none';
+        document.getElementById('confirm-order-btn').style.display = 'block';
+    }
+
+    function toggleSlipUpload() {
+        const method = document.getElementById('pay-method').value;
+        document.getElementById('slip-upload-area').style.display = (method === 'Bank Transfer') ? 'block' : 'none';
+    }
+
+    async function processOrder() {
+        const name = document.getElementById('cust-name').value;
+        const address = document.getElementById('cust-address').value;
+        const method = document.getElementById('pay-method').value;
+        const slipFile = document.getElementById('pay-slip').files[0];
+
+        if (!name || !address) return alert("Please provide name and delivery address.");
+
+        // STOCK VALIDATION
+        const latestInv = JSON.parse(localStorage.getItem('uraha_inventory')) || [];
+        let outOfStockItems = [];
+        cart.forEach(item => {
+            const p = latestInv.find(prod => prod.id === item.id);
+            if(!p || p.stock <= 0) outOfStockItems.push(item.name);
+        });
+
+        if(outOfStockItems.length > 0) {
+            alert(`Sorry, some items are no longer available: ${outOfStockItems.join(', ')}`);
+            return;
+        }
+
+        let slipBase64 = null;
+        if (method === 'Bank Transfer' && slipFile) {
+            slipBase64 = await toBase64(slipFile);
+        }
+
+        const order = {
+            id: Date.now(),
+            date: new Date().toLocaleString(),
+            customer: name,
+            address: address,
+            method: method,
+            items: cart.map(i => i.name).join(', '),
+            total: cart.reduce((sum, i) => sum + i.price, 0),
+            slip: slipBase64,
+            status: 'Pending'
+        };
+
+        const sales = JSON.parse(localStorage.getItem('uraha_sales')) || [];
+        sales.unshift(order);
         localStorage.setItem('uraha_sales', JSON.stringify(sales));
+
+        alert("Order Received! Thank you for shopping with Uraha.");
+        cart = [];
+        location.reload(); 
     }
 
-    // Backup & Restore
-    function downloadBackup() {
-        const data = { inventory, categories, sales };
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `uraha_backup_${new Date().toLocaleDateString()}.json`;
-        link.click();
-    }
-
-    function importBackup(event) {
-        const file = event.target.files[0];
-        if (!file) return;
+    const toBase64 = file => new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const imported = JSON.parse(e.target.result);
-                if (imported.inventory && imported.categories) {
-                    inventory = imported.inventory;
-                    categories = imported.categories;
-                    sales = imported.sales || [];
-                    render();
-                    alert("System Restored Successfully.");
-                }
-            } catch (err) { alert("Invalid backup file."); }
-        };
-        reader.readAsText(file);
-    }
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
 
-    function exportToCSV() {
-        if (sales.length === 0) return alert("No sales to export.");
-        let csvContent = "data:text/csv;charset=utf-8,Date,Items,Total (USD)\n";
-        sales.forEach(s => csvContent += `"${s.date}","${s.items}",${s.total}\n`);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodeURI(csvContent));
-        link.setAttribute("download", "uraha_sales_report.csv");
-        link.click();
-    }
-
-    function addCategory() {
-        const val = document.getElementById('new-cat-name').value.trim();
-        if(val) { categories.push(val); document.getElementById('new-cat-name').value = ''; render(); }
-    }
-    function removeCategory(i) { if(confirm("Remove?")) { categories.splice(i, 1); render(); } }
-    function handleSave() {
-        const item = {
-            id: editIndex > -1 ? inventory[editIndex].id : Date.now(),
-            name: document.getElementById('p-name').value,
-            price: parseFloat(document.getElementById('p-price').value) || 0,
-            stock: parseInt(document.getElementById('p-stock').value) || 0,
-            category: document.getElementById('p-cat').value,
-            image: document.getElementById('p-img').value.replace(/^\//, '') || "home-page/placeholder.jpg",
-            desc: document.getElementById('p-desc').value
-        };
-        if(!item.name) return;
-        if(editIndex > -1) inventory[editIndex] = item; else inventory.push(item);
-        resetForm(); render();
-    }
-    function startEdit(i) {
-        editIndex = i; const item = inventory[i];
-        document.getElementById('p-name').value = item.name;
-        document.getElementById('p-price').value = item.price;
-        document.getElementById('p-stock').value = item.stock;
-        document.getElementById('p-cat').value = item.category;
-        document.getElementById('p-img').value = item.image;
-        document.getElementById('p-desc').value = item.desc;
-        document.getElementById('form-title').innerText = "Update: " + item.name;
-        document.getElementById('cancel-btn').style.display = "block";
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-    function resetForm() {
-        editIndex = -1;
-        document.querySelectorAll('#form-card input, #form-card textarea').forEach(el => el.value = '');
-        document.getElementById('form-title').innerText = "Product Details";
-        document.getElementById('cancel-btn').style.display = "none";
-    }
-    function clearSales() { if(confirm("Wipe log?")) { sales = []; render(); } }
-    function copyCode() { navigator.clipboard.writeText(document.getElementById('code-output').textContent); alert("Copied."); }
-
-    render();
+    renderCategories();
+    renderProducts(products);
 </script>
 </body>
-
 </html>
