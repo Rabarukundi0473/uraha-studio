@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uraha Art Shop | Curated Collection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #ffffff; --text: #1a1a1a; --accent: #7a7a7a;
+            --light-grey: #f4f4f4; --border: #eeeeee;
+            --transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        [data-theme="dark"] {
+            --bg: #0b0b0b; --text: #ffffff; --accent: #999999;
+            --light-grey: #1a1a1a; --border: #222222;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); transition: background var(--transition); overflow-x: hidden; }
+
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 5%; position: sticky; top: 0; background: var(--bg); border-bottom: 1px solid var(--border); z-index: 100; }
+        .brand-logo { display: flex; align-items: center; gap: 8px; cursor: pointer; text-decoration: none; color: inherit; }
+        .brand-logo img { height: 25px; width: auto; } 
+        .brand-name { font-weight: 600; letter-spacing: 2px; text-transform: uppercase; font-size: 0.9rem; }
+        
+        .search-container { flex-grow: 1; max-width: 300px; margin: 0 2rem; }
+        .search-input { width: 100%; padding: 0.5rem; border: none; background: var(--light-grey); color: var(--text); border-radius: 20px; outline: none; padding-left: 1.2rem; font-size: 0.8rem; }
+
+        .nav-controls { display: flex; gap: 1.2rem; align-items: center; }
+        .btn-icon { background: none; border: none; color: var(--text); cursor: pointer; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; font-family: inherit; }
+
+        .categories { display: flex; justify-content: center; gap: 2rem; padding: 1.2rem 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+        .cat-btn { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s; padding-bottom: 4px; border-bottom: 2px solid transparent; font-family: inherit; }
+        .cat-btn.active { color: var(--text); border-bottom: 2px solid var(--text); }
+
+        header { padding: 4rem 5% 2rem; text-align: center; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 5%; }
+        .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2.5rem; margin-bottom: 5rem; }
+        
+        .product-card { position: relative; }
+        .sold-out-tag { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 4px 10px; font-size: 0.6rem; z-index: 10; }
+        .product-img-wrapper { width: 100%; aspect-ratio: 1/1; background: var(--light-grey); margin-bottom: 1rem; overflow: hidden; cursor: pointer; }
+        .product-card img { width: 100%; height: 100%; object-fit: cover; transition: 0.6s ease; }
+        .product-card.out-of-stock img { opacity: 0.4; filter: grayscale(1); }
+        .product-card:hover img { transform: scale(1.05); }
+        .product-info { display: flex; justify-content: space-between; align-items: center; }
+        .price { color: var(--accent); font-weight: 300; font-size: 0.85rem; }
+
+        .panel { position: fixed; top: 0; width: 100%; max-width: 400px; height: 100%; background: var(--bg); z-index: 1000; padding: 3rem 2rem; display: flex; flex-direction: column; transition: var(--transition); box-shadow: 0 0 50px rgba(0,0,0,0.1); }
+        #cart-panel { right: -100%; border-left: 1px solid var(--border); }
+        #detail-panel { left: -100%; border-right: 1px solid var(--border); }
+        .panel.active { right: 0 !important; left: 0 !important; }
+        .panel-close { position: absolute; top: 1.5rem; right: 2rem; cursor: pointer; font-size: 0.65rem; }
+
+        .btn-main { background: var(--text); color: var(--bg); border: 1px solid var(--text); padding: 1rem; width: 100%; cursor: pointer; font-family: inherit; text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem; }
+        .btn-main:disabled { background: var(--border); color: var(--accent); border-color: var(--border); cursor: not-allowed; }
+        
+        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 0.8rem 1.5rem; border-radius: 50px; font-size: 0.75rem; opacity: 0; visibility: hidden; transition: 0.3s; z-index: 3000; }
+        #toast.show { opacity: 1; visibility: visible; bottom: 50px; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="#" class="brand-logo" onclick="location.reload()">
+        <img src="home-page/logo.png" alt="Logo" onerror="this.style.display='none'">
+        <span class="brand-name">Uraha</span>
+    </a>
+    <div class="search-container">
+        <input type="text" class="search-input" id="search" placeholder="Search..." onkeyup="filterProducts()">
+    </div>
+    <div class="nav-controls">
+        <button class="btn-icon" id="curr-btn" onclick="toggleCurrency()">Currency: USD</button>
+        <button class="btn-icon" onclick="toggleTheme()">Dark</button>
+        <button class="btn-icon" onclick="togglePanel('cart-panel', true)">Bag (<span id="cart-count">0</span>)</button>
+    </div>
+</nav>
+
+<div class="categories" id="cat-bar"></div>
+
+<main class="container">
+    <div class="products" id="product-grid" style="margin-top: 3rem;"></div>
+</main>
+
+<div class="panel" id="cart-panel">
+    <span class="panel-close" onclick="togglePanel('cart-panel', false)">CLOSE</span>
+    <h3 style="text-transform:uppercase; letter-spacing:2px; font-weight:400; margin-bottom: 2rem;">Selection</h3>
+    <div id="cart-items" style="flex-grow:1; overflow-y:auto;"></div>
+    <div style="border-top:1px solid var(--border); padding-top:1.5rem;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:1.5rem; font-weight:600">
+            <span>Subtotal</span><span id="subtotal">$0.00</span>
+        </div>
+        <button class="btn-main" onclick="processCheckout()">Checkout</button>
+    </div>
+</div>
+
+<div class="panel" id="detail-panel">
+    <span class="panel-close" onclick="togglePanel('detail-panel', false)">CLOSE</span>
+    <div id="detail-content" style="margin-top:2rem;"></div>
+</div>
+
+<div id="toast">Added</div>
+
+<script>
+    const savedInv = localStorage.getItem('uraha_inventory');
+    const savedCats = localStorage.getItem('uraha_categories');
+    const products = savedInv ? JSON.parse(savedInv) : [];
+    const categories = savedCats ? JSON.parse(savedCats) : ["Pendants", "Bracelets", "Art Works"];
+
+    let cart = [];
+    let currentCategory = 'All';
+    let isMVR = false;
+    const rate = 15.42;
+
+    function formatPrice(usd) {
+        if(isMVR) return `MVR ${(usd * rate).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+        return `$${usd.toFixed(2)}`;
+    }
+
+    function toggleCurrency() {
+        isMVR = !isMVR;
+        document.getElementById('curr-btn').innerText = isMVR ? 'Currency: MVR' : 'Currency: USD';
+        filterProducts();
+        updateCart();
+    }
+
+    function renderCategories() {
+        const bar = document.getElementById('cat-bar');
+        let html = `<button class="cat-btn ${currentCategory === 'All' ? 'active' : ''}" onclick="filterCategory('All', this)">All</button>`;
+        categories.forEach(cat => {
+            html += `<button class="cat-btn ${currentCategory === cat ? 'active' : ''}" onclick="filterCategory('${cat}', this)">${cat}</button>`;
+        });
+        bar.innerHTML = html;
+    }
+
+    function renderProducts(items) {
+        const grid = document.getElementById('product-grid');
+        grid.innerHTML = items.map(p => {
+            const isOut = p.stock <= 0;
+            return `
+            <div class="product-card ${isOut ? 'out-of-stock' : ''}">
+                ${isOut ? '<div class="sold-out-tag">SOLD OUT</div>' : ''}
+                <div class="product-img-wrapper" onclick="showDetail(${p.id})">
+                    <img src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/400?text=Uraha'">
+                </div>
+                <div class="product-info">
+                    <div onclick="showDetail(${p.id})">
+                        <h4 style="font-size:0.8rem; font-weight:400;">${p.name}</h4>
+                        <span class="price">${formatPrice(p.price)}</span>
+                    </div>
+                    <button class="btn-icon" style="border:1px solid var(--border); padding: 4px 8px;" onclick="addToCart(${p.id})" ${isOut ? 'disabled' : ''}>${isOut ? '---' : '+ ADD'}</button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function filterProducts() {
+        const query = document.getElementById('search').value.toLowerCase();
+        const filtered = products.filter(p => (currentCategory === 'All' || p.category === currentCategory) && p.name.toLowerCase().includes(query));
+        renderProducts(filtered);
+    }
+
+    function filterCategory(cat, btn) {
+        currentCategory = cat;
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filterProducts();
+    }
+
+    function showDetail(id) {
+        const p = products.find(prod => prod.id === id);
+        const isOut = p.stock <= 0;
+        document.getElementById('detail-content').innerHTML = `
+            <img src="${p.image}" style="width:100%; aspect-ratio:1/1; object-fit:cover; margin-bottom:2rem; ${isOut ? 'grayscale(1)' : ''}">
+            <h2 style="font-weight:400; font-size: 1.2rem;">${p.name}</h2>
+            <p style="color:var(--accent); font-size:0.75rem; margin: 0.8rem 0;">${p.category} | ${formatPrice(p.price)}</p>
+            <p style="font-size: 0.8rem; line-height: 1.8; color: var(--accent);">${p.desc}</p>
+            <button class="btn-main" style="margin-top:2rem;" onclick="addToCart(${p.id})" ${isOut ? 'disabled' : ''}>${isOut ? 'Sold Out' : 'Add to Bag'}</button>`;
+        togglePanel('detail-panel', true);
+    }
+
+    function addToCart(id) {
+        const p = products.find(prod => prod.id === id);
+        cart.push({ ...p, cartId: Date.now() });
+        updateCart();
+        showToast(`Added to bag`);
+    }
+
+    function updateCart() {
+        document.getElementById('cart-count').innerText = cart.length;
+        const total = cart.reduce((sum, i) => sum + i.price, 0);
+        document.getElementById('subtotal').innerText = formatPrice(total);
+        document.getElementById('cart-items').innerHTML = cart.map(item => `
+            <div style="padding:1rem 0; border-bottom:1px solid var(--border); display:flex; justify-content:space-between;">
+                <span style="font-size:0.75rem;">${item.name}</span>
+                <span style="font-size:0.75rem;">${formatPrice(item.price)}</span>
+            </div>`).join('');
+    }
+
+    function processCheckout() {
+        if (cart.length === 0) return;
+        const totalUSD = cart.reduce((sum, i) => sum + i.price, 0);
+        const sales = JSON.parse(localStorage.getItem('uraha_sales')) || [];
+        sales.unshift({ id: Date.now(), date: new Date().toLocaleString(), items: cart.map(i => i.name).join(', '), total: totalUSD });
+        localStorage.setItem('uraha_sales', JSON.stringify(sales));
+        alert("Order Received!"); cart = []; updateCart(); togglePanel('cart-panel', false);
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg; t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    function togglePanel(id, state) {
+        const p = document.getElementById(id);
+        state ? p.classList.add('active') : p.classList.remove('active');
+    }
+
+    function toggleTheme() { document.body.toggleAttribute('data-theme'); }
+
+    renderCategories();
+    renderProducts(products);
+</script>
+</body>
+</html>
